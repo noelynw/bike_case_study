@@ -1,20 +1,11 @@
-#v2.0. starting on 5/6/2022
-
+### 1.0 Run trips_01_import.R to install &  packages, then import csv.
 #environment 
 install.packages(hablar)
 library(hablar)
 
-##### frequent error #########################################################
-#  ! cannot allocate vector of size 256.0 Mb
-# this error is becoz of memory shortage. got many huge df in the Environment.
-##############################################################################
-
-### 1.0 Run trips_01_import.R to install &  packages, then import csv.
-
 ### 1.1 Study the colnames. 
 # for consistency, follow the colnames in readme of 2013.
-
-# Compare year to year. Check for discrepancies among the colnames. 
+# Compare year to year. Check for discrepancies in colnames. 
 # Examine manually for 2018, 2019, 2020 data as their colnames are vastly different. 
 all.equal(colnames(t_2013), colnames(t_2014)) #[1] "1 string mismatch"
 all.equal(colnames(t_2014), colnames(t_2015)) #TRUE. 
@@ -60,7 +51,7 @@ t_2019_Q2_n1 <- t_2019_Q2 %>%
          gender = "Member Gender",
          birthyear = "05 - Member Details Member Birthday Year")
 
-### 1.22 check for equal colnames. 
+### 1.22 check for discrepancies in colnames year by year. 
 all.equal(colnames(t_2018_Q1_n1), colnames(t_2018_Q2))  #[1] "2 string mismatches"
 all.equal(colnames(t_2018_Q2), colnames(t_2018_Q3)) #TRUE
 all.equal(colnames(t_2018_Q3), colnames(t_2018_Q4)) #TRUE
@@ -69,57 +60,36 @@ all.equal(colnames(t_2019_Q1), colnames(t_2019_Q2_n1))  #[1] "2 string mismatche
 all.equal(colnames(t_2019_Q2_n1), colnames(t_2019_Q3))  #[1] "2 string mismatches"
 all.equal(colnames(t_2019_Q3), colnames(t_2019_Q4))  #TRUE
 
-#investigate further. 
-colnames(t_2018_Q1_n1)
-colnames(t_2018_Q2)
-colnames(t_2018_Q3)
-colnames(t_2018_Q4)
-
-colnames(t_2019_Q1)
-colnames(t_2019_Q2_n1)
-colnames(t_2019_Q3)
-colnames(t_2019_Q4)
+#investigate each using colnames(). Code has been omitted here for brevity. 
 
 ### 1.23 change colnames : start_time, end_time to starttime, stoptime. 
 # 2017, 2018, 2019 data. 
 
 t_2017 <- t_2017 %>%                        #merged 2017 data. 
-  rename( starttime = start_time, 
-          stoptime = end_time)
+  rename( starttime = start_time, stoptime = end_time)
 
 t_2018_Q2 <- t_2018_Q2 %>% 
-  rename( starttime = start_time, 
-          stoptime = end_time)
+  rename( starttime = start_time, stoptime = end_time)
 
 t_2018_Q3 <- t_2018_Q3 %>% 
-  rename( starttime = start_time, 
-          stoptime = end_time)
+  rename( starttime = start_time, stoptime = end_time)
 
 t_2018_Q4 <- t_2018_Q4 %>% 
-  rename( starttime = start_time, 
-          stoptime = end_time)
+  rename( starttime = start_time, stoptime = end_time)
 
 t_2019_Q1 <- t_2019_Q1 %>% 
-  rename( starttime = start_time, 
-          stoptime = end_time)
+  rename( starttime = start_time, stoptime = end_time)
 
 t_2019_Q3 <- t_2019_Q3 %>% 
-  rename( starttime = start_time, 
-          stoptime = end_time)
+  rename( starttime = start_time, stoptime = end_time)
 
 t_2019_Q4 <- t_2019_Q4 %>% 
-  rename( starttime = start_time, 
-          stoptime = end_time)
+  rename( starttime = start_time, stoptime = end_time)
 
 ###1.4  combine 2018, 2019 data. 
-t_2018 <- bind_rows(t_2018_Q1_n1,            #merged 2018 data. 
-                    t_2018_Q2, 
-                    t_2018_Q3, 
-                    t_2018_Q4)
+t_2018 <- bind_rows(t_2018_Q1_n1, t_2018_Q2, t_2018_Q3, t_2018_Q4) #merged 2018 data. 
 
-t_2019 <- bind_rows(t_2019_Q1, t_2019_Q2_n1, #merged 2019 data. 
-                    t_2019_Q3, t_2019_Q4 )
-
+t_2019 <- bind_rows(t_2019_Q1, t_2019_Q2_n1, t_2019_Q3, t_2019_Q4 ) #merged 2019 data. 
 
 ###1.51 change the data type from num to chr, 
 #affected columns: trip_id, from_station_id and to_station_id 
@@ -171,20 +141,11 @@ t_2019 <- t_2019 %>%
 # used colnames()
 
 ###1.61 investigation
-# tried to combine all year 2020 dfs before cleaning colnames. 
+# tried to combine all the monthly 2020 dfs before cleaning colnames. 
 # can't. the start_station_id , end_station_id data type is inconsistent.
-# most is dbl, one df has it in chr. 
+# most is dbl, december's df has it in chr. 
 
-head(t_2020_Q1) #dbl
-head(t_2020_04) #dbl
-head(t_2020_05) #dbl
-head(t_2020_06) #dbl
-head(t_2020_07) #dbl
-head(t_2020_08) #dbl
-head(t_2020_09) #dbl
-head(t_2020_10) #dbl
-head(t_2020_11) #dbl
-head(t_2020_12) #char. And 2021 2022 data, start or end _station_id is char.
+head(t_2020_12) #char. And in 2021 2022 data, start_station_d and end _station_id is char.
 
 ###1.62 combine January to November 2020 trips data
 t_2020_jan_to_nov <- bind_rows(t_2020_Q1,  
@@ -196,15 +157,8 @@ t_2020_jan_to_nov <- bind_rows(t_2020_Q1,
 # affected columns : start_station_id , end_station_id 
 # need the convert() from package hablar.
 
-library(hablar)
-
 t_2020_jan_to_nov <- t_2020_jan_to_nov %>% 
   convert(chr(start_station_id, end_station_id))
-
-### 1.64 calculate tripduration for t_2020_12. 2020Jan-Nov, 2021, 2022, 
-# The daylight saving dates need some adjustment later on. 
-
-
 
 ###1.65 here, combine all 2020 dataframes. 
 
@@ -245,8 +199,7 @@ t_2022 <- t_2022 %>%
 
 ### 1.8 change the datatype of startime and stoptime, from chr to dttm. 
 # for years: 2014 to 2017. 
-# on 5/27 - correct timezone tz, from UTC to America/Chicago. That shall solve the problems in 
-# data that occurs around daylight saving cut off time. 
+# on 5/27 - correct timezone tz, from UTC to America/Chicago. 
 t_2014 <- t_2014 %>%
   mutate(starttime = strptime(starttime, "%m/%d/%Y %H:%M", tz ="America/Chicago"), 
          stoptime = strptime(stoptime, "%m/%d/%Y %H:%M", tz ="America/Chicago"))
@@ -263,7 +216,7 @@ t_2017 <- t_2017 %>%
   mutate(starttime = strptime(starttime, "%m/%d/%Y %H:%M", tz ="America/Chicago"), 
          stoptime = strptime(stoptime, "%m/%d/%Y %H:%M", tz ="America/Chicago"))
 
-# 2018 onwards the starttime and stoptime are in dttm to begin with, not in char. 
+# 2013, and 2018 - 2022 onwards the starttime and stoptime are in dttm to begin with, not in char. 
 # We just need to give it tz. 
 
 ## example begins. Change char to dttm, and set tz. 
@@ -272,36 +225,72 @@ t_2017 <- t_2017 %>%
 # [1] "2016-01-01 10:10:10 UTC"
 ## example ends. 
 
-t_2018 <- t_2018 %>%
-  mutate(starttime = as.POSIXct(starttime, tz = "America/Chicago"), 
-         stoptime = as.POSIXct(stoptime, tz = "America/Chicago"))
+#t_2018 <- t_2018 %>%          #  this code doesn't change the timezone succssfully. 
+#  mutate(starttime = as.POSIXct(starttime, tz = "America/Chicago"), 
+#         stoptime = as.POSIXct(stoptime, tz = "America/Chicago"))
 
-t_2019 <- t_2019 %>%
-  mutate(starttime = as.POSIXct(starttime, tz = "America/Chicago"), 
-         stoptime = as.POSIXct(stoptime, tz = "America/Chicago"))
+#as.POSIXct(t_2018$starttime, tz = "Cuba", optional = TRUE) # this doesn't change the tz either!
 
-t_2020 <- t_2020 %>%
-  mutate(starttime = as.POSIXct(starttime, tz = "America/Chicago"), 
-         stoptime = as.POSIXct(stoptime, tz = "America/Chicago"))
 
-t_2021 <- t_2021 %>%
-  mutate(starttime = as.POSIXct(starttime, tz = "America/Chicago"), 
-         stoptime = as.POSIXct(stoptime, tz = "America/Chicago"))
 
-t_2022 <- t_2022 %>%
-  mutate(starttime = as.POSIXct(starttime, tz = "America/Chicago"), 
-         stoptime = as.POSIXct(stoptime, tz = "America/Chicago"))
+# This might will set the timezone for real, but might cause tripduration to misbehave... 
+t_2013$starttime <- with_tz(t_2013$starttime, "America/Chicago")
+t_2013$stoptime <- with_tz(t_2013$stoptime, "America/Chicago")
+
+t_2018$starttime <- with_tz(t_2018$starttime, "America/Chicago")
+t_2018$stoptime <- with_tz(t_2018$stoptime, "America/Chicago")
+
+t_2019$starttime <- with_tz(t_2019$starttime, "America/Chicago")
+t_2019$stoptime <- with_tz(t_2019$stoptime, "America/Chicago")
+
+t_2020$starttime <- with_tz(t_2020$starttime, "America/Chicago")
+t_2020$stoptime <- with_tz(t_2020$stoptime, "America/Chicago")
+
+t_2021$starttime <- with_tz(t_2021$starttime, "America/Chicago")
+t_2021$stoptime <- with_tz(t_2021$stoptime, "America/Chicago")
+
+t_2022$starttime <- with_tz(t_2022$starttime, "America/Chicago")
+t_2022$stoptime <- with_tz(t_2022$stoptime, "America/Chicago")
+
+
+# 6/8 commenting below lines. Might crash something in tripduration.  be warned! 
+#t_2019 <- t_2019 %>%
+#  mutate(starttime = as.POSIXct(starttime, tz = "America/Chicago"), 
+#         stoptime = as.POSIXct(stoptime, tz = "America/Chicago"))
+
+#t_2020 <- t_2020 %>%
+#  mutate(starttime = as.POSIXct(starttime, tz = "America/Chicago"), 
+#         stoptime = as.POSIXct(stoptime, tz = "America/Chicago"))
+
+#t_2021 <- t_2021 %>%
+#  mutate(starttime = as.POSIXct(starttime, tz = "America/Chicago"), 
+#         stoptime = as.POSIXct(stoptime, tz = "America/Chicago"))
+
+#t_2022 <- t_2022 %>%
+#  mutate(starttime = as.POSIXct(starttime, tz = "America/Chicago"), 
+#         stoptime = as.POSIXct(stoptime, tz = "America/Chicago"))
+
+
+
+
+# below code is added on 6/7/2022. Caused difftime() to misbehave - it gave huge -ve num. 
+#t_2020$starttime <- force_tz(t_2020$starttime, tzone = "America/Chicago")
+#t_2021$starttime <- force_tz(t_2021$starttime, tzone = "America/Chicago")
+#t_2022$starttime <- force_tz(t_2022$starttime, tzone = "America/Chicago")
+# end new code. 
 
 # calculate tripduration for 2020 to 2022 trips data, 
 # now that the timezone of the starttime and stoptime has been set,
 # which takes care of daylight savings troubles. 
 
 #create new column, tripduration. Arbitrarily put 1 sec as value.  
-t_2020$tripduration <- 1L
-t_2021$tripduration <- 1L
-t_2022$tripduration <- 1L
+t_2020$tripduration <- 1
+t_2021$tripduration <- 1
+t_2022$tripduration <- 1
 
-#calculate, and then fill in the tripduration column. 
+#calculate, and then fill in the tripduration column. Don't add tz in below. 
+# Or... need tz now? 6/8 after i fixed the tz problem in the columns starttime stoptime?
+
 
 t_2020 <- t_2020 %>% 
   mutate(tripduration = difftime(stoptime, starttime), .before = 5) %>% 
@@ -315,11 +304,14 @@ t_2022 <- t_2022 %>%
   mutate(tripduration = difftime(stoptime, starttime), .before = 5) %>% 
   convert(num(tripduration))
 
+
+
+
+
 ###1.81 free up memory space. Now that all the dfs have been merged. 
 
 rm(t_2018_Q1, t_2018_Q1_n1, t_2018_Q2, t_2018_Q3, t_2018_Q4, 
-   t_2019_Q1, t_2019_Q2, t_2019_Q2_n1, t_2019_Q3, t_2019_Q4)
-
-rm(t_2020_Q1, t_2020_04, t_2020_05, t_2020_06, t_2020_07, t_2020_08, 
+   t_2019_Q1, t_2019_Q2, t_2019_Q2_n1, t_2019_Q3, t_2019_Q4,
+   t_2020_Q1, t_2020_04, t_2020_05, t_2020_06, t_2020_07, t_2020_08, 
    t_2020_09, t_2020_10, t_2020_11, t_2020_12, t_2020_jan_to_nov)
-##
+
