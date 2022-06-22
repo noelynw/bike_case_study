@@ -219,11 +219,7 @@ t_2017 <- t_2017 %>%
 # now that the timezone of the starttime and stoptime has been set,
 # which takes care of daylight savings troubles. 
 
-#create new column, tripduration. Arbitrarily put 1 sec as value.  
-
-# t_2020$tripduration <- 1
-# t_2021$tripduration <- 1
-# t_2022$tripduration <- 1
+#create new column, tripduration. 
 
 t_2020 <- t_2020 %>% 
   mutate(tripduration = difftime(stoptime, starttime), .before = 5) %>% 
@@ -237,17 +233,185 @@ t_2022 <- t_2022 %>%
   mutate(tripduration = difftime(stoptime, starttime), .before = 5) %>% 
   convert(num(tripduration))
 
-### 1.91 adjust the calculated tripduration for daylight saving time. 2020 to 2022. 
-
-# ~~~~~~ [ paste code here ] ~~~~~~~~~~~~~
-
-
-
-
-###2.00 free up memory space. Now that all the dfs have been merged. 
-
+#free up memory space. Now that all the dfs have been merged. 
 rm(t_2018_Q1, t_2018_Q1_n1, t_2018_Q2, t_2018_Q3, t_2018_Q4, 
    t_2019_Q1, t_2019_Q2, t_2019_Q2_n1, t_2019_Q3, t_2019_Q4,
    t_2020_Q1, t_2020_04, t_2020_05, t_2020_06, t_2020_07, t_2020_08, 
    t_2020_09, t_2020_10, t_2020_11, t_2020_12, t_2020_jan_to_nov)
 
+### 1.91 adjust the calculated tripduration for daylight saving time. 2020 to 2022. 
+
+# make a back up, for verification comparison later on. 
+old_t_2020 <- t_2020
+old_t_2021 <- t_2021
+old_t_2022 <- t_2022
+
+########### for 2020 March daylight saving adjustment 
+
+# step1)  important window for year 2020's daylight saving day. 
+dt_01_2020 <- as.POSIXct('2020-03-07 02:00:00', tz = "UTC")
+dt_02_2020 <- as.POSIXct('2020-03-08 02:00:00', tz = "UTC")
+dt_03_2020 <- as.POSIXct('2020-03-08 03:00:00', tz = "UTC")
+dt_04_2020 <- as.POSIXct('2020-03-09 03:00:00', tz = "UTC")
+
+# step2) subset data that are dated around the daylight saving in march 2020.
+mar2020_DS <- t_2020 %>% 
+  filter((stoptime < dt_04_2020 & stoptime > dt_03_2020) & 
+           (starttime < dt_02_2020 & starttime > dt_01_2020)) %>% 
+  arrange(stoptime)
+
+# step3) reference vector containing the trip_id of rows whose tripduration needs to minus 3600. 
+vect_mar_2020 <- mar2020_DS$trip_id   
+
+# step4)  correct the tripduration data. Minus 3600 secs. 
+t_2020[t_2020$trip_id %in% vect_mar_2020, "tripduration"] <- t_2020[(t_2020$trip_id %in% vect_mar_2020), "tripduration"] - 3600
+
+########## for 2020 November daylight saving adjustment. 
+
+# step1) important windows in time. 
+dt_11_2020 <- as.POSIXct('2020-11-01 01:00:00', tz = "UTC")
+dt_12_2020 <- as.POSIXct('2020-11-01 02:00:00', tz = "UTC")
+
+# step2) subset data that are dated around the daylight saving day. 
+nov2020_DS <- t_2020 %>% 
+  filter((starttime < dt_12_2020 & starttime > dt_11_2020) & (stoptime < dt_12_2020 & stoptime > dt_11_2020)) %>% 
+  arrange(starttime)
+
+# step3) subset by two cases. create reference vector for each case. 
+case_1_2020 <- nov2020_DS %>% 
+  filter(tripduration < 0)
+
+case_2_2020 <- nov2020_DS %>% 
+  filter(tripduration >= 0)
+
+vect_nov_2020_case_1 <- case_1_2020$trip_id 
+vect_nov_2020_case_2 <- case_2_2020$trip_id
+
+# step4) correct the tripduration data. 
+# For case_1, plus 3600 secs. For case_2, put NA in the tripduration coz 
+# we don't know if it is 1:01 a.m. CST or CDT... 
+
+# case 1
+t_2020[t_2020$trip_id %in% vect_nov_2020_case_1, "tripduration"] <- t_2020[(t_2020$trip_id %in% vect_nov_2020_case_1), "tripduration"] + 3600
+
+# case 2 
+t_2020[t_2020$trip_id %in% vect_nov_2020_case_2, "tripduration"] <- NA
+
+########### for 2021 March, daylight saving adjustment 
+
+# step1)  important window for year 2021's daylight saving day. 
+dt_01_2021 <- as.POSIXct('2021-03-13 02:00:00', tz = "UTC")
+dt_02_2021 <- as.POSIXct('2021-03-14 02:00:00', tz = "UTC")
+dt_03_2021 <- as.POSIXct('2021-03-14 03:00:00', tz = "UTC")
+dt_04_2021 <- as.POSIXct('2021-03-15 03:00:00', tz = "UTC")
+
+# step2) subset data that are dated around the daylight saving in march 2021.
+mar2021_DS <- t_2021 %>% 
+  filter((stoptime < dt_04_2021 & stoptime > dt_03_2021) & 
+           (starttime < dt_02_2021 & starttime > dt_01_2021)) %>% 
+  arrange(stoptime)
+
+# step3) reference vector containing the trip_id of rows whose tripduration needs to minus 3600. 
+vect_mar_2021 <- mar2021_DS$trip_id   
+
+# step4)  correct the tripduration data. Minus 3600 secs. 
+t_2021[t_2021$trip_id %in% vect_mar_2021, "tripduration"] <- t_2021[(t_2021$trip_id %in% vect_mar_2021), "tripduration"] - 3600
+
+########## for 2021 November daylight saving adjustment. 
+
+# step1) important windows in time. 
+dt_11_2021 <- as.POSIXct('2021-11-07 01:00:00', tz = "UTC")
+dt_12_2021 <- as.POSIXct('2021-11-07 02:00:00', tz = "UTC")
+
+# step2) subset data that are dated around the daylight saving day. 
+nov2021_DS <- t_2021 %>% 
+  filter((starttime < dt_12_2021 & starttime > dt_11_2021) & (stoptime < dt_12_2021 & stoptime > dt_11_2021)) %>% 
+  arrange(starttime)
+
+# step3) subset by two cases. create reference vector for each case. 
+case_1_2021 <- nov2021_DS %>% 
+  filter(tripduration < 0)
+
+case_2_2021 <- nov2021_DS %>% 
+  filter(tripduration >= 0)
+
+vect_nov_2021_case_1 <- case_1_2021$trip_id 
+vect_nov_2021_case_2 <- case_2_2021$trip_id
+
+# step4) correct the tripduration data. 
+
+t_2021[(t_2021$trip_id %in% vect_nov_2021_case_1), "tripduration"] <- t_2021[t_2021$trip_id %in% vect_nov_2021_case_1, "tripduration"] + 3600
+t_2021[(t_2021$trip_id %in% vect_nov_2021_case_2), "tripduration"] <- NA
+
+########### for 2022 March, daylight saving adjustment 
+
+# step1)  important window for year 2022's daylight saving day. 
+dt_01_2022 <- as.POSIXct('2022-03-12 02:00:00', tz = "UTC")
+dt_02_2022 <- as.POSIXct('2022-03-13 02:00:00', tz = "UTC")
+dt_03_2022 <- as.POSIXct('2022-03-13 03:00:00', tz = "UTC")
+dt_04_2022 <- as.POSIXct('2022-03-14 03:00:00', tz = "UTC")
+
+# step2) subset data that are dated around the daylight saving in march 2022.
+mar2022_DS <- t_2022 %>% 
+  filter((stoptime < dt_04_2022 & stoptime > dt_03_2022) & 
+           (starttime < dt_02_2022 & starttime > dt_01_2022)) %>% 
+  arrange(stoptime)
+
+# step3) reference vector containing the trip_id of rows whose tripduration needs to minus 3600. 
+vect_mar_2022 <- mar2022_DS$trip_id   
+
+# step4)  correct the tripduration data. Minus 3600 secs. 
+t_2022[t_2022$trip_id %in% vect_mar_2022, "tripduration"] <- t_2022[(t_2022$trip_id %in% vect_mar_2022), "tripduration"] - 3600
+
+##############################################################
+### Verify. The time 2:00 to 2:59 does not exist on the daylight change day in March. 
+# Check to make sure there doesn't exist starttime/stoptime during that.
+# Else, we will need to change the value to NA. 
+
+dt_x1_2020 <- as.POSIXct('2020-03-08 02:00:00', tz = "UTC")
+dt_x2_2020 <- as.POSIXct('2020-03-08 02:59:00', tz = "UTC")
+
+t_2020 %>% 
+  filter((stoptime < dt_x2_2020 & stoptime > dt_x1_2020) & 
+           (starttime < dt_x2_2020 & starttime > dt_x1_2020)) %>% 
+  arrange(stoptime)
+
+dt_x1_2021 <- as.POSIXct('2021-03-14 02:00:00', tz = "UTC")
+dt_x2_2021 <- as.POSIXct('2021-03-14 02:59:00', tz = "UTC")
+
+t_2021 %>% 
+  filter((stoptime < dt_x2_2021 & stoptime > dt_x1_2021) & 
+           (starttime < dt_x2_2021 & starttime > dt_x1_2021)) %>% 
+  arrange(stoptime)
+
+dt_x1_2022 <- as.POSIXct('2022-03-13 02:00:00', tz = "UTC")
+dt_x2_2022 <- as.POSIXct('2022-03-13 02:59:00', tz = "UTC")
+
+t_2022 %>% 
+  filter((stoptime < dt_x2_2022 & stoptime > dt_x1_2022) & 
+           (starttime < dt_x2_2022 & starttime > dt_x1_2022)) %>% 
+  arrange(stoptime)
+
+##############################################################
+### verify each pair
+
+View(old_t_2020[t_2020$trip_id %in% vect_mar_2020, "tripduration"])
+View(t_2020[t_2020$trip_id %in% vect_mar_2020, "tripduration"])
+
+View(t_2020[t_2020$trip_id %in% vect_nov_2020_case_1, "tripduration"])
+View(old_t_2020[t_2020$trip_id %in% vect_nov_2020_case_1, "tripduration"])
+
+View(t_2020[t_2020$trip_id %in% vect_nov_2020_case_2, "tripduration"])
+View(old_t_2020[t_2020$trip_id %in% vect_nov_2020_case_2, "tripduration"])
+
+View(old_t_2021[t_2021$trip_id %in% vect_mar_2021, "tripduration"])
+View(t_2021[t_2021$trip_id %in% vect_mar_2021, "tripduration"])
+
+View(t_2021[t_2021$trip_id %in% vect_nov_2021_case_1, "tripduration"])
+View(old_t_2021[t_2021$trip_id %in% vect_nov_2021_case_1, "tripduration"])
+
+View(t_2021[t_2021$trip_id %in% vect_nov_2021_case_2, "tripduration"])
+View(old_t_2021[t_2021$trip_id %in% vect_nov_2021_case_2, "tripduration"])
+
+View(old_t_2022[t_2022$trip_id %in% vect_mar_2022, "tripduration"])
+View(t_2022[t_2022$trip_id %in% vect_mar_2022, "tripduration"])
